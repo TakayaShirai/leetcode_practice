@@ -90,3 +90,37 @@ class Solution {
     return nil
   }
 }
+
+// Step 4:
+// レビューを受けて、以下の点を改善
+//   - head が nil の場合は、early return で nil を返すようにした
+//   - head が nil でないことをチェックした直後に、nullableNode と宣言すると、nil でないのになぜ nullable を付けるのかと思われる可能性が
+//   あり認知負荷が高そうであったため、nodeToCheckCycle という名前を使用するようにした
+//   - 実際には、visitedNodes は Node の集合ではないため、visitedNodeIds という名前を使用するようにした
+
+class Solution {
+  func detectCycle(_ head: ListNode?) -> ListNode? {
+    guard let head else { return nil }
+
+    var nodeToCheckCycle: ListNode? = head
+
+    // ObjectIdentifier を使用する理由:
+    // ListNode は参照型（クラス）のため、同じ値（val）を持つ異なるノードインスタンスを区別する必要がある。
+    // ObjectIdentifier は各インスタンスの一意の識別子を提供し、同じインスタンスへの参照を正確に検出できる。
+    // また、ListNode は Hashable プロトコルに準拠していないため、Set<ListNode> として直接使用できない。
+    var visitedNodeIds = Set<ObjectIdentifier>()
+
+    while let node = nodeToCheckCycle {
+      let nodeId = ObjectIdentifier(node)
+
+      if visitedNodeIds.contains(nodeId) {
+        return node
+      }
+
+      visitedNodeIds.insert(nodeId)
+      nodeToCheckCycle = node.next
+    }
+
+    return nil
+  }
+}
