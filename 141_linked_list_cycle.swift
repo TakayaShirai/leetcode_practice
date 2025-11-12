@@ -113,3 +113,36 @@ class Solution {
     return false
   }
 }
+
+// Step 4:
+// レビューを受けて、以下の点を改善
+//   - head が nil の場合は、early return で false を返すようにした
+//   - curNode が cur をつける文脈上つける意味があまりないため、nodeToCheckCycle という名前を使用。 単なる node でも良かったが、node を使用すると
+//     while let node = node となり、while 文内の node = node.next で代入ができなくなるため、node とは異なる名前を使用した。
+//     単なる node を使用し、while let nodeToCheckCycle = node とすることも考えたが、node = nodeToCheckCycle.next などで意味が分かりづらくなると考え採用しなかった
+//   - 実際には、visitedNodes は Node の集合ではないため、visitedNodeIds という名前を使用するようにした
+
+class Solution {
+  func hasCycle(_ head: ListNode?) -> Bool {
+    guard let head else { return false }
+
+    // Set を使用する場合には、Hashable プロトコルに準拠している必要があるが、
+    // ListNode は Hashable には準拠していないため、代わりに class などのインスタンスの比較に
+    // 用いられる ObjectIdentifier を使用した。
+    var visitedNodeIds = Set<ObjectIdentifier>()
+    var nodeToCheckCycle: ListNode? = head
+
+    while let node = nodeToCheckCycle {
+      let nodeId = ObjectIdentifier(node)
+
+      if visitedNodeIds.contains(nodeId) {
+        return true
+      }
+
+      visitedNodeIds.insert(nodeId)
+      nodeToCheckCycle = node.next
+    }
+
+    return false
+  }
+}
