@@ -178,3 +178,110 @@ class Solution {
     return firstConfirmed
   }
 }
+
+// Step 5:
+// force-unwrapping 多用は確かに保守性・可読性の観点からよくなかった。
+// force-unwrapping を使用しないできちんと書き直す。
+class Solution {
+  func deleteDuplicates(_ head: ListNode?) -> ListNode? {
+    guard let head else { return nil }
+
+    let dummyHead = ListNode(0)
+    var lastConfirmed: ListNode = dummyHead
+    var nodeToCheck: ListNode? = head
+
+    while let node = nodeToCheck {
+      guard let next = node.next, node.val == next.val else {
+        lastConfirmed.next = node
+        lastConfirmed = node
+        nodeToCheck = node.next
+        lastConfirmed.next = nil
+        continue
+      }
+
+      let valueToRemove = node.val
+      var removeCandidate: ListNode? = node
+      while let candidate = removeCandidate, candidate.val == valueToRemove {
+        removeCandidate = candidate.next
+      }
+      nodeToCheck = removeCandidate
+    }
+
+    return dummyHead.next
+  }
+}
+
+// dummyHead を使わない手法の書き直し。
+class Solution {
+  func deleteDuplicates(_ head: ListNode?) -> ListNode? {
+    func skipDuplicates(_ node: ListNode?) -> ListNode? {
+      guard let node else { return nil }
+      guard let next = node.next, node.val == next.val else {
+        return node
+      }
+
+      let valueToRemove = node.val
+      var removeCandidate: ListNode? = node
+      while let candidate = removeCandidate, candidate.val == valueToRemove {
+        removeCandidate = candidate.next
+      }
+
+      return skipDuplicates(removeCandidate)
+    }
+
+    guard let firstConfirmed = skipDuplicates(head) else { return nil }
+
+    var lastConfirmed: ListNode = firstConfirmed
+    var nodeToCheck: ListNode? = firstConfirmed.next
+    firstConfirmed.next = nil
+    lastConfirmed.next = nil
+
+    while let node = skipDuplicates(nodeToCheck) {
+      lastConfirmed.next = node
+      lastConfirmed = node
+      nodeToCheck = node.next
+      lastConfirmed.next = nil
+    }
+
+    return firstConfirmed
+  }
+}
+
+// skipDuplicates を外部に出してみた。skipDuplicates のテストがしやすかったり、
+// 責務の分離、再利用性に優れていると感じるため、個人的にはこちらのほうが好み。
+// ただ、deleteDuplicates のみに使用されるならそこまでしなくても良い？
+
+class Solution {
+  func deleteDuplicates(_ head: ListNode?) -> ListNode? {
+    guard let firstConfirmed = skipDuplicates(head) else { return nil }
+
+    var lastConfirmed: ListNode = firstConfirmed
+    var nodeToCheck: ListNode? = firstConfirmed.next
+    firstConfirmed.next = nil
+    lastConfirmed.next = nil
+
+    while let node = skipDuplicates(nodeToCheck) {
+      lastConfirmed.next = node
+      lastConfirmed = node
+      nodeToCheck = node.next
+      lastConfirmed.next = nil
+    }
+
+    return firstConfirmed
+  }
+
+  private func skipDuplicates(_ head: ListNode?) -> ListNode? {
+    guard let head else { return nil }
+    guard let next = head.next, head.val == next.val else {
+      return head
+    }
+
+    let valueToRemove = head.val
+    var removeCandidate: ListNode? = head
+    while let candidate = removeCandidate, candidate.val == valueToRemove {
+      removeCandidate = candidate.next
+    }
+
+    return skipDuplicates(removeCandidate)
+  }
+}
