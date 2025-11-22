@@ -224,8 +224,8 @@ class Solution {
     var l2Node: ListNode? = l2
     var carry: Int = 0
 
-    var dummyHead = ListNode(0, nil)
-    var lastConfirmed: ListNode = dummyHead
+    var dummy = ListNode(0, nil)
+    var lastConfirmed: ListNode = dummy
 
     while l1Node != nil || l2Node != nil || carry != 0 {
       let l1Value: Int = l1Node?.val ?? 0
@@ -245,6 +245,6 @@ class Solution {
       l2Node = l2Node?.next
     }
 
-    return dummyHead.next
+    return dummy.next
   }
 }
