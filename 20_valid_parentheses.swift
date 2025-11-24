@@ -113,3 +113,30 @@ class Solution {
     return openBrackets.isEmpty
   }
 }
+
+// Step 4:
+class Solution {
+  func isValid(_ s: String) -> Bool {
+    var openBrackets: [Character] = []
+    let closeToOpen: [Character: Character] = [")": "(", "}": "{", "]": "["]
+    let bracketsToCheck: Set<Character> = ["(", ")", "{", "}", "[", "]"]
+
+    for inputChar in s {
+      guard bracketsToCheck.contains(inputChar) else { continue }
+
+      let isCloseBracket = closeToOpen[inputChar] != nil
+      guard isCloseBracket else {
+        openBrackets.append(inputChar)
+        continue
+      }
+
+      guard !openBrackets.isEmpty else { return false }
+      let expectedOpenBracket = closeToOpen[inputChar]!
+      guard openBrackets.popLast() == expectedOpenBracket else {
+        return false
+      }
+    }
+
+    return openBrackets.isEmpty
+  }
+}
