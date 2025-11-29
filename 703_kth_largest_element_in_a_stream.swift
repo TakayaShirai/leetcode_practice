@@ -201,3 +201,145 @@ class KthLargest {
     return kLargestScores.min!
   }
 }
+
+// Step 4:
+// Heap (Min-heap) の実装をやってみる
+// 以下の動画を見て、他の人のコードなどは参考にせず実装してみた。練習のおかげか意外とできた。
+// https://www.youtube.com/watch?v=HqPJF2L5h9U
+public class MinHeap {
+
+  private var values: [Int]
+  private var lastValueIdx: Int
+
+  init(nums: [Int] = []) {
+    values = nums
+    lastValueIdx = nums.count - 1
+    heapify()
+  }
+
+  public var count: Int {
+    return lastValueIdx + 1
+  }
+
+  public var isEmpty: Bool {
+    return lastValueIdx >= 0
+  }
+
+  public func insert(_ value: Int) -> Int {
+    if lastValueIdx == values.count - 1 {
+      values.append(value)
+    } else {
+      values[lastValueIdx + 1] = value
+    }
+
+    lastValueIdx += 1
+    swapUp(nodeIdx: lastValueIdx)
+
+    return top()!
+  }
+
+  public func pop() -> Int? {
+    guard let minValue = top() else {
+      return nil
+    }
+
+    swapValues(value1Idx: 0, value2Idx: lastValueIdx)
+    lastValueIdx -= 1
+
+    if lastValueIdx >= 0 {
+      swapDown(nodeIdx: 0)
+    }
+
+    return minValue
+  }
+
+  public func top() -> Int? {
+    guard !values.isEmpty else {
+      return nil
+    }
+
+    return values[0]
+  }
+
+  private func heapify() {
+    guard lastValueIdx >= 0 else { return }
+
+    let startIdx = (lastValueIdx - 1) / 2
+
+    for i in (0...startIdx).reversed() {
+      swapDown(nodeIdx: i)
+    }
+  }
+
+  private func swapUp(nodeIdx: Int) {
+    guard 0 < nodeIdx && nodeIdx <= lastValueIdx else {
+      return
+    }
+
+    let parentIdx: Int = (nodeIdx - 1) / 2
+
+    guard values[parentIdx] > values[nodeIdx] else {
+      return
+    }
+
+    swapValues(value1Idx: parentIdx, value2Idx: nodeIdx)
+    swapUp(nodeIdx: parentIdx)
+  }
+
+  private func swapDown(nodeIdx: Int) {
+    guard 0 <= nodeIdx && nodeIdx <= lastValueIdx else {
+      return
+    }
+
+    let child1Idx: Int = nodeIdx * 2 + 1
+    let child2Idx: Int = nodeIdx * 2 + 2
+
+    guard child1Idx <= lastValueIdx else {
+      return
+    }
+
+    let nodeValue: Int = values[nodeIdx]
+
+    guard child2Idx <= lastValueIdx else {
+      let child1Value: Int = values[child1Idx]
+
+      if nodeValue > child1Value {
+        swapValues(value1Idx: nodeIdx, value2Idx: child1Idx)
+        swapDown(nodeIdx: child1Idx)
+      }
+
+      return
+    }
+
+    let child1Value = values[child1Idx]
+    let child2Value = values[child2Idx]
+
+    var smallerValue: Int
+    var smallerValueIdx: Int
+
+    if child1Value < child2Value {
+      smallerValue = child1Value
+      smallerValueIdx = child1Idx
+    } else {
+      smallerValue = child2Value
+      smallerValueIdx = child2Idx
+    }
+
+    guard nodeValue > smallerValue else {
+      return
+    }
+
+    swapValues(value1Idx: nodeIdx, value2Idx: smallerValueIdx)
+    swapDown(nodeIdx: smallerValueIdx)
+  }
+
+  private func swapValues(value1Idx: Int, value2Idx: Int) {
+    guard value1Idx < values.count && value2Idx < values.count else {
+      return
+    }
+
+    let tmp: Int = values[value1Idx]
+    values[value1Idx] = values[value2Idx]
+    values[value2Idx] = tmp
+  }
+}
